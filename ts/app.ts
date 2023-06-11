@@ -14,15 +14,22 @@ const source = {
     }
 };
 
-function flatten(obj: { [x: string]: any; }, prefix = ''): { [x: string]: any;  } {
+function deflate(obj: { [x: string]: any; }, prefix = ''): { [x: string]: any;  } {
     return Object.keys(obj).reduce((acc, k) => {
         const accT = acc as { [x: string]: any; };
-        const pre = prefix.length ? prefix + '.' : '';
-        if (typeof obj[k] === 'object') Object.assign(acc, flatten(obj[k], pre + k));
-        else accT[pre + k] = obj[k];
+        let fieldPrefix = '';
+        if (prefix.length) {
+            fieldPrefix = `${prefix}.`;
+        }
+        if (isNestedObj(obj[k])) Object.assign(acc, deflate(obj[k], fieldPrefix + k));
+        else accT[fieldPrefix + k] = obj[k];
         return acc;
     }, {});
 };
+
+function isNestedObj(obj: any) {
+    return !Array.isArray(obj) && obj === Object(obj);
+}
 
 function inflate(obj: { [x: string]: any; }, prefix = '') {
     const inflated: { [x: string]: any; } = {};
@@ -31,7 +38,12 @@ function inflate(obj: { [x: string]: any; }, prefix = '') {
         let referencedObj = inflated;
         fields.forEach((field, index) => {
             if (index + 1 === fields.length) {
-                referencedObj[field] = obj[fieldPath];
+                let valueToUse = obj[fieldPath];
+                if (Array.isArray(valueToUse)) {
+                    const arr = [...valueToUse];
+                    valueToUse = arr;
+                }
+                referencedObj[field] = valueToUse;
             } else if (!referencedObj[field]) {
                 referencedObj[field] = {};
             }
@@ -52,15 +64,18 @@ class Person {
 const fieldMap: [string, string][] = [
     ['oper.givenName', 'debtorAcc.agent.firstName'],
     ['oper.familyName', 'debtorAcc.agent.lastName'],
-    ['oper.numbers.[]', 'debtorAcc.agent.nums[]'],
+    ['oper.numbers', 'debtorAcc.agent.nums'],
 ];
 
 function map(obj: any, fieldMap: [string, string][]) {
-    const flattenedSrc = flatten(obj);
-    const flattenedTarget: { [x: string]: any; } = {};
+    const deflatedSrc = deflate(obj);
+    const deflatedTarget: { [x: string]: any; } = {};
     fieldMap.forEach( mapping => {
-        flattenedTarget[mapping[1]] = flattenedSrc[mapping[0]];
+        deflatedTarget[mapping[1]] = deflatedSrc[mapping[0]];
     });
-    console.log(inflate(flattenedTarget));
-
+    console.log(obj);
+    console.log(deflatedSrc);
+    console.log(deflatedTarget);
+    const mapped = inflate(deflatedTarget);
+    console.log(mapped);
 }
