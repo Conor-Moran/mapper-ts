@@ -12,7 +12,7 @@ const source = {
             234
         ]
     }
-};
+}
 
 function deflate(obj: { [x: string]: any; }, prefix = ''): { [x: string]: any;  } {
     return Object.keys(obj).reduce((acc, k) => {
@@ -24,7 +24,7 @@ function deflate(obj: { [x: string]: any; }, prefix = ''): { [x: string]: any;  
         else acc[fieldPrefix + k] = obj[k];
         return acc;
     }, {} as { [x: string]: any; });
-};
+}
 
 function isNestedObj(obj: any) {
     return !Array.isArray(obj) && obj === Object(obj);
@@ -50,7 +50,7 @@ function inflate(obj: { [x: string]: any; }, prefix = '') {
         });
     });
     return inflated;
-};
+}
 
 class Person {
     constructor(
