@@ -1,0 +1,19 @@
+{
+  "name": "node-first",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"${PATH}\"",
+    "serve-app": "/home/conor/dev/utils/simples &",
+    "dev": "nodemon",
+    "start": "ts-node index.ts"
+  },
+  "author": "cj",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.3"
+  }
+}
