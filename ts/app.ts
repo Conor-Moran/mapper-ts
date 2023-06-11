@@ -16,15 +16,14 @@ const source = {
 
 function deflate(obj: { [x: string]: any; }, prefix = ''): { [x: string]: any;  } {
     return Object.keys(obj).reduce((acc, k) => {
-        const accT = acc as { [x: string]: any; };
         let fieldPrefix = '';
         if (prefix.length) {
             fieldPrefix = `${prefix}.`;
         }
         if (isNestedObj(obj[k])) Object.assign(acc, deflate(obj[k], fieldPrefix + k));
-        else accT[fieldPrefix + k] = obj[k];
+        else acc[fieldPrefix + k] = obj[k];
         return acc;
-    }, {});
+    }, {} as { [x: string]: any; });
 };
 
 function isNestedObj(obj: any) {
