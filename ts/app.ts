@@ -2,7 +2,9 @@ export function main() {
     //console.log(map(source, fieldMap));
     //p(data, trio);
     //console.log(trio);
-    console.log(doMap());
+    const fieldMap = doMap();
+    console.log(fieldMap);
+    console.log(map(data, fieldMap));
 };
 
 const source = {
@@ -104,7 +106,7 @@ const trio = new Trio(
 
 const data = {
     debtors: {
-        debtorAgt1: {
+        agent: {
             givenName: 'John',
             familyName: 'Smith',
             postalAddr: {
@@ -112,7 +114,7 @@ const data = {
                 cityName: 'New York'
             }
         },
-        debtorAgt2: {
+        party1: {
             givenName: 'Jane',
             familyName: 'Warrick',
             postalAddr: {
@@ -147,8 +149,8 @@ const trioFieldMap = {
  } as FieldMap;
 
 const addrFieldMap = {
-    'l1': 'line1',
-    'l2': 'line2',
+    'ln1': 'line1',
+    'ln2': 'line2',
     'cityName': 'city',
 } as FieldMap;
 
@@ -185,7 +187,7 @@ class Builder {
 function doMap() {
     const partyFieldMap = new Builder(personFieldMap);
     partyFieldMap.meld_append({
-        'workAddr': 'postalAddr'
+        'postalAddr': 'workAddr'
     }, addrFieldMap);
     
     const builder = new Builder(masterFieldMap);
@@ -193,9 +195,9 @@ function doMap() {
         'creditors.agent': 'creds.agt',
         'creditors.party1': 'creds.person1',
         'creditors.party2': 'creds.person1',
-        'debtors.agent': 'creds.agt',
-        'debtors.party1': 'creds.person1',
-        'debtors.party2': 'creds.person2',
+        'debtors.agent': 'debs.agt',
+        'debtors.party1': 'debs.person1',
+        'debtors.party2': 'debs.person2',
     }, partyFieldMap.final());
 
     return builder.final();
