@@ -159,6 +159,17 @@ const personFieldMap = {
     'familyName': 'lastName',
 } as FieldMap;
 
+function cross(map1: FieldMap, map2: FieldMap): FieldMap {
+    const crossed = {} as FieldMap;
+
+    Object.keys(map1).forEach(key => {
+        Object.keys(map2).forEach(subKey => {
+            crossed[`${key}.${subKey}`]  = `${map1[key]}.${map2[subKey]}`;
+        });
+    });
+    return crossed;
+}
+
 class Builder {
 
     masterFieldMap: FieldMap = {};
@@ -167,15 +178,8 @@ class Builder {
         Object.assign(this.masterFieldMap, masterFieldMap);
     }
 
-    meld_append(map1: FieldMap, map2: FieldMap): Builder {
-        const melded = {} as FieldMap;
-
-        Object.keys(map1).forEach(key => {
-            Object.keys(map2).forEach(subKey => {
-                melded[`${key}.${subKey}`]  = `${map1[key]}.${map2[subKey]}`;
-            });
-        });
-        Object.assign(this.masterFieldMap, melded);
+    append(fieldMap: FieldMap): Builder {
+        Object.assign(this.masterFieldMap, fieldMap);
         return this;
     }
 
@@ -186,19 +190,19 @@ class Builder {
 
 function doMap() {
     const partyFieldMap = new Builder(personFieldMap);
-    partyFieldMap.meld_append({
+    partyFieldMap.append(cross({
         'postalAddr': 'workAddr'
-    }, addrFieldMap);
+    }, addrFieldMap));
     
     const builder = new Builder(masterFieldMap);
-    builder.meld_append({
+    builder.append(cross({
         'creditors.agent': 'creds.agt',
         'creditors.party1': 'creds.person1',
         'creditors.party2': 'creds.person1',
         'debtors.agent': 'debs.agt',
         'debtors.party1': 'debs.person1',
         'debtors.party2': 'debs.person2',
-    }, partyFieldMap.final());
+    }, partyFieldMap.final()));
 
     return builder.final();
 }
