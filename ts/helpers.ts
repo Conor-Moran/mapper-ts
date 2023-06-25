@@ -6,15 +6,64 @@ export type FieldMap = {[x: string]: string};
 
 export function map(obj: any, fieldMap: FieldMap) {
     const target: { [x: string]: any; } = {};
+    const deflatedSrc = deflate(obj);
 
     Object.keys(fieldMap).forEach( key => {
-        const srcValue = getFlatField(key, obj);
+        const srcValue = deflatedSrc[key];
         if (srcValue) {
             setFlatField(fieldMap[key], target, srcValue);
         }
     });
 
     return target;
+}
+
+export function deflate(obj: { [x: string]: any; }, prefix = ''): { [x: string]: any;  } {
+    return Object.keys(obj).reduce((acc, k) => {
+        let fieldPrefix = '';
+        if (prefix.length) {
+            fieldPrefix = `${prefix}.`;
+        }
+        if (isNestedObj(obj[k])) Object.assign(acc, deflate(obj[k], fieldPrefix + k));
+        else if (Array.isArray(obj[k])) {
+            const arr = obj[k] as [];
+            arr.forEach((value, index) => {
+                if (isNestedObj(value)) {
+                    Object.assign(acc, deflate(value, `${fieldPrefix}${k}[${index}]`));
+                } else if (Array.isArray(value)) {
+                    throw new Error('Unsupported - Array of Array');
+                } else {
+                    acc[`${fieldPrefix}${k}[${index}]`] = value;
+                }
+            });
+
+        }
+        else acc[fieldPrefix + k] = obj[k];
+        return acc;
+    }, {} as { [x: string]: any; });
+}
+
+
+function isNestedObj(obj: any) {
+    return !Array.isArray(obj) && obj === Object(obj);
+}
+
+export function inflate(obj: { [x: string]: any; }, prefix = '') {
+    const inflated: { [x: string]: any; } = {};
+    Object.keys(obj).forEach((fieldPath: string) => {
+        const leafValue = obj[fieldPath];
+        const fields = fieldPath.split('.');
+        let curObj = inflated;
+        fields.forEach((field, index) => {
+            if (index + 1 === fields.length) {
+                setLeafField(field, curObj,  leafValue);
+            } else if (!getLeafField(field, curObj)) {
+                setLeafField(field, curObj,  {});
+            }
+            curObj = getLeafField(field, curObj);
+        });
+    });
+    return inflated;
 }
 
 export function setFlatField(fieldPath: string, obj: { [x: string]: any }, value: any) {

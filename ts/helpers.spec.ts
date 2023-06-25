@@ -1,4 +1,4 @@
-import { setFlatField } from "./helpers";
+import { deflate, inflate, setFlatField } from "./helpers";
 
 describe("Helpers", function() {
 
@@ -33,6 +33,25 @@ describe("Helpers", function() {
                 b: ['x'],
             }]
         }));
+    });
+
+
+    it('should set handle deflate/inflate roundtrip', function() {
+        const obj = {
+            f1: [{
+                g1: 'v1',
+                g2: [{
+                    h1: {
+                        i1: 'v2',
+                    }
+                }]
+            },
+            'v1']
+        };
+        const deflated = deflate(obj);
+        console.log(deflated);
+        const inflated = inflate(deflate(obj));
+        expect(inflated).toEqual(jasmine.objectContaining(obj));
     });
 
 });
