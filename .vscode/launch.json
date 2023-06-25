@@ -9,9 +9,6 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/index.ts",
-            "env": {
-                "PATH": "/home/conor/dev/languages/node-v18.16.0-linux-x64/bin:${env:PATH}"
-            },
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]
